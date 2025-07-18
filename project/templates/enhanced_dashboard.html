@@ -1,0 +1,862 @@
+"""
+Enhanced Dashboard Template for Emergency Hospital Bed Booking System
+
+Advanced real-time dashboard with:
+- Interactive analytics charts
+- Real-time monitoring
+- Live notifications
+- Performance metrics
+- Capacity planning
+- System health monitoring
+"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Booking Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <style>
+        .dashboard-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.25);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .trend-up {
+            color: #28a745;
+        }
+        
+        .trend-down {
+            color: #dc3545;
+        }
+        
+        .trend-stable {
+            color: #ffc107;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .alert-panel {
+            background: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid #dc3545;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-operational {
+            background-color: #28a745;
+            animation: pulse-green 2s infinite;
+        }
+        
+        .status-warning {
+            background-color: #ffc107;
+            animation: pulse-yellow 2s infinite;
+        }
+        
+        .status-critical {
+            background-color: #dc3545;
+            animation: pulse-red 2s infinite;
+        }
+        
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+        
+        @keyframes pulse-yellow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+        }
+        
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        
+        .real-time-indicator {
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .hospital-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .hospital-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .capacity-bar {
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            background: #e9ecef;
+        }
+        
+        .capacity-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .capacity-low {
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+        
+        .capacity-medium {
+            background: linear-gradient(90deg, #ffc107, #fd7e14);
+        }
+        
+        .capacity-high {
+            background: linear-gradient(90deg, #fd7e14, #dc3545);
+        }
+        
+        .capacity-critical {
+            background: linear-gradient(90deg, #dc3545, #721c24);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-0">
+                <div class="p-3">
+                    <h4 class="text-center mb-4">
+                        <i class="fas fa-hospital"></i> Emergency Dashboard
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="#overview" data-section="overview">
+                            <i class="fas fa-tachometer-alt me-2"></i> Overview
+                        </a>
+                        <a class="nav-link" href="#hospitals" data-section="hospitals">
+                            <i class="fas fa-building me-2"></i> Hospitals
+                        </a>
+                        <a class="nav-link" href="#analytics" data-section="analytics">
+                            <i class="fas fa-chart-line me-2"></i> Analytics
+                        </a>
+                        <a class="nav-link" href="#bookings" data-section="bookings">
+                            <i class="fas fa-calendar-check me-2"></i> Bookings
+                        </a>
+                        <a class="nav-link" href="#alerts" data-section="alerts">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Alerts
+                            <span class="notification-badge" id="alert-count">0</span>
+                        </a>
+                        <a class="nav-link" href="#reports" data-section="reports">
+                            <i class="fas fa-file-alt me-2"></i> Reports
+                        </a>
+                        <a class="nav-link" href="#settings" data-section="settings">
+                            <i class="fas fa-cog me-2"></i> Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <!-- Header -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="dashboard-card p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h2 class="mb-1">Emergency Hospital Dashboard</h2>
+                                    <p class="mb-0 opacity-75">
+                                        <span class="status-indicator status-operational real-time-indicator"></span>
+                                        Real-time monitoring • Last updated: <span id="last-updated">--</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="btn-group">
+                                        <button class="btn btn-light btn-sm" onclick="refreshDashboard()">
+                                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                                        </button>
+                                        <button class="btn btn-light btn-sm" onclick="exportData()">
+                                            <i class="fas fa-download me-1"></i> Export
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Overview Section -->
+                <div id="overview-section" class="dashboard-section">
+                    <!-- Key Metrics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="metric-card p-4 text-center">
+                                <div class="metric-value text-primary" id="total-beds">--</div>
+                                <div class="metric-label">Total Beds</div>
+                                <div class="mt-2">
+                                    <i class="fas fa-bed fa-2x text-muted"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card p-4 text-center">
+                                <div class="metric-value text-success" id="available-beds">--</div>
+                                <div class="metric-label">Available Beds</div>
+                                <div class="mt-2">
+                                    <i class="fas fa-check-circle fa-2x text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card p-4 text-center">
+                                <div class="metric-value" id="utilization-rate">--</div>
+                                <div class="metric-label">Utilization Rate</div>
+                                <div class="mt-2">
+                                    <i class="fas fa-chart-pie fa-2x text-info"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card p-4 text-center">
+                                <div class="metric-value text-warning" id="emergency-cases">--</div>
+                                <div class="metric-label">Emergency Cases</div>
+                                <div class="mt-2">
+                                    <i class="fas fa-ambulance fa-2x text-warning"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="chart-container">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Bed Utilization Trend
+                                    <span class="badge bg-success ms-2">Live</span>
+                                </h5>
+                                <div id="utilization-chart" style="height: 400px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="chart-container">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-chart-pie me-2"></i>
+                                    Capacity Distribution
+                                </h5>
+                                <div id="capacity-chart" style="height: 400px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hospital Status Cards -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-hospital me-2"></i>
+                                Hospital Status Overview
+                            </h5>
+                            <div id="hospital-status-cards">
+                                <!-- Dynamic hospital cards will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Section -->
+                <div id="analytics-section" class="dashboard-section" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4>
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Advanced Analytics
+                            </h4>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5>Emergency Response Times</h5>
+                                <div id="response-time-chart" style="height: 300px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5>Peak Hours Analysis</h5>
+                                <div id="peak-hours-chart" style="height: 300px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="chart-container">
+                                <h5>Capacity Forecast (Next 30 Days)</h5>
+                                <div id="forecast-chart" style="height: 400px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alerts Section -->
+                <div id="alerts-section" class="dashboard-section" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4>
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                System Alerts & Notifications
+                            </h4>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div id="alerts-container">
+                                <!-- Dynamic alerts will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading dashboard data...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class DashboardManager {
+            constructor() {
+                this.socket = null;
+                this.isConnected = false;
+                this.refreshInterval = null;
+                this.charts = {};
+                this.initializeWebSocket();
+                this.initializeEventListeners();
+                this.loadInitialData();
+            }
+            
+            initializeWebSocket() {
+                try {
+                    this.socket = io();
+                    
+                    this.socket.on('connect', () => {
+                        console.log('WebSocket connected');
+                        this.isConnected = true;
+                        this.updateConnectionStatus('operational');
+                    });
+                    
+                    this.socket.on('disconnect', () => {
+                        console.log('WebSocket disconnected');
+                        this.isConnected = false;
+                        this.updateConnectionStatus('warning');
+                    });
+                    
+                    this.socket.on('utilization_update', (data) => {
+                        this.handleUtilizationUpdate(data);
+                    });
+                    
+                    this.socket.on('new_booking', (data) => {
+                        this.handleNewBooking(data);
+                    });
+                    
+                    this.socket.on('alert', (data) => {
+                        this.handleAlert(data);
+                    });
+                    
+                } catch (error) {
+                    console.error('WebSocket initialization failed:', error);
+                    this.updateConnectionStatus('critical');
+                }
+            }
+            
+            initializeEventListeners() {
+                // Navigation
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = e.target.closest('.nav-link').dataset.section;
+                        this.showSection(section);
+                        this.updateActiveNav(e.target.closest('.nav-link'));
+                    });
+                });
+                
+                // Auto-refresh
+                this.refreshInterval = setInterval(() => {
+                    this.refreshData();
+                }, 30000); // Refresh every 30 seconds
+            }
+            
+            async loadInitialData() {
+                this.showLoading(true);
+                
+                try {
+                    // Load dashboard data
+                    const dashboardData = await this.fetchDashboardData();
+                    this.updateDashboardMetrics(dashboardData);
+                    
+                    // Load charts
+                    await this.loadCharts();
+                    
+                    // Load hospital status
+                    await this.loadHospitalStatus();
+                    
+                    this.updateLastUpdated();
+                    
+                } catch (error) {
+                    console.error('Failed to load initial data:', error);
+                    this.showError('Failed to load dashboard data');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+            
+            async fetchDashboardData() {
+                const response = await fetch('/api/v1/analytics/dashboard');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            }
+            
+            updateDashboardMetrics(data) {
+                if (data.success && data.data) {
+                    const metrics = data.data;
+                    
+                    // Update key metrics
+                    document.getElementById('total-beds').textContent = 
+                        metrics.utilization_summary?.total_beds || '--';
+                    document.getElementById('available-beds').textContent = 
+                        metrics.utilization_summary?.available_beds || '--';
+                    document.getElementById('utilization-rate').textContent = 
+                        `${metrics.utilization_summary?.current || 0}%`;
+                    document.getElementById('emergency-cases').textContent = 
+                        metrics.emergency_summary?.total_today || '--';
+                    
+                    // Update alerts count
+                    if (metrics.alerts) {
+                        document.getElementById('alert-count').textContent = metrics.alerts.length;
+                        this.updateAlerts(metrics.alerts);
+                    }
+                    
+                    // Update system status
+                    this.updateSystemStatus(metrics.system_health);
+                }
+            }
+            
+            async loadCharts() {
+                try {
+                    // Load utilization chart
+                    const utilizationData = await this.fetchUtilizationData();
+                    this.createUtilizationChart(utilizationData);
+                    
+                    // Load capacity chart
+                    this.createCapacityChart();
+                    
+                    // Load analytics charts if in analytics section
+                    if (document.getElementById('analytics-section').style.display !== 'none') {
+                        await this.loadAnalyticsCharts();
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to load charts:', error);
+                }
+            }
+            
+            async fetchUtilizationData() {
+                const response = await fetch('/api/v1/analytics/utilization?days=7');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            }
+            
+            createUtilizationChart(data) {
+                // Sample data for demonstration
+                const x = [];
+                const y = [];
+                
+                // Generate sample time series data
+                const now = new Date();
+                for (let i = 23; i >= 0; i--) {
+                    const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+                    x.push(time);
+                    y.push(Math.random() * 30 + 60); // Random utilization between 60-90%
+                }
+                
+                const trace = {
+                    x: x,
+                    y: y,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: 'Bed Utilization',
+                    line: {
+                        color: '#3498db',
+                        width: 3
+                    },
+                    marker: {
+                        size: 6,
+                        color: '#2980b9'
+                    }
+                };
+                
+                const layout = {
+                    title: '',
+                    xaxis: {
+                        title: 'Time',
+                        showgrid: true,
+                        gridcolor: '#f1f1f1'
+                    },
+                    yaxis: {
+                        title: 'Utilization (%)',
+                        range: [0, 100],
+                        showgrid: true,
+                        gridcolor: '#f1f1f1'
+                    },
+                    margin: { t: 10, b: 50, l: 50, r: 10 },
+                    showlegend: false,
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    paper_bgcolor: 'rgba(0,0,0,0)'
+                };
+                
+                Plotly.newPlot('utilization-chart', [trace], layout, {responsive: true});
+                this.charts.utilization = true;
+            }
+            
+            createCapacityChart() {
+                const data = [{
+                    values: [25, 45, 20, 10],
+                    labels: ['Available', 'General', 'ICU', 'Emergency'],
+                    type: 'pie',
+                    hole: 0.4,
+                    marker: {
+                        colors: ['#28a745', '#17a2b8', '#ffc107', '#dc3545']
+                    }
+                }];
+                
+                const layout = {
+                    title: '',
+                    margin: { t: 10, b: 10, l: 10, r: 10 },
+                    showlegend: true,
+                    legend: {
+                        orientation: 'v',
+                        x: 1,
+                        y: 0.5
+                    },
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    paper_bgcolor: 'rgba(0,0,0,0)'
+                };
+                
+                Plotly.newPlot('capacity-chart', data, layout, {responsive: true});
+                this.charts.capacity = true;
+            }
+            
+            async loadHospitalStatus() {
+                try {
+                    const response = await fetch('/api/v1/hospitals');
+                    const data = await response.json();
+                    
+                    if (data.success && data.data.hospitals) {
+                        this.renderHospitalCards(data.data.hospitals);
+                    }
+                } catch (error) {
+                    console.error('Failed to load hospital status:', error);
+                }
+            }
+            
+            renderHospitalCards(hospitals) {
+                const container = document.getElementById('hospital-status-cards');
+                container.innerHTML = '';
+                
+                hospitals.forEach(hospital => {
+                    const utilizationPercent = hospital.utilization_rate || 0;
+                    const capacityClass = this.getCapacityClass(utilizationPercent);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'hospital-card';
+                    card.innerHTML = `
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h6 class="mb-1">${hospital.name}</h6>
+                                <p class="text-muted mb-2">${hospital.address}</p>
+                                <div class="d-flex align-items-center">
+                                    <span class="status-indicator ${this.getStatusClass(utilizationPercent)}"></span>
+                                    <small class="text-muted">${this.getStatusText(utilizationPercent)}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="h5 mb-0">${hospital.available_beds}</div>
+                                    <small class="text-muted">Available</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="capacity-bar mb-2">
+                                    <div class="capacity-fill ${capacityClass}" 
+                                         style="width: ${utilizationPercent}%"></div>
+                                </div>
+                                <div class="text-center">
+                                    <small>${utilizationPercent.toFixed(1)}% Utilized</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            }
+            
+            getCapacityClass(percent) {
+                if (percent < 60) return 'capacity-low';
+                if (percent < 80) return 'capacity-medium';
+                if (percent < 90) return 'capacity-high';
+                return 'capacity-critical';
+            }
+            
+            getStatusClass(percent) {
+                if (percent < 80) return 'status-operational';
+                if (percent < 90) return 'status-warning';
+                return 'status-critical';
+            }
+            
+            getStatusText(percent) {
+                if (percent < 80) return 'Normal Capacity';
+                if (percent < 90) return 'High Capacity';
+                return 'Critical Capacity';
+            }
+            
+            updateAlerts(alerts) {
+                const container = document.getElementById('alerts-container');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                if (alerts.length === 0) {
+                    container.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            No active alerts. All systems operating normally.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                alerts.forEach(alert => {
+                    const alertClass = alert.level === 'critical' ? 'alert-danger' : 
+                                     alert.level === 'warning' ? 'alert-warning' : 'alert-info';
+                    
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = `alert ${alertClass}`;
+                    alertDiv.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>${alert.level.toUpperCase()}:</strong> ${alert.message}
+                            </div>
+                            <small>${new Date(alert.timestamp).toLocaleTimeString()}</small>
+                        </div>
+                    `;
+                    
+                    container.appendChild(alertDiv);
+                });
+            }
+            
+            showSection(sectionName) {
+                // Hide all sections
+                document.querySelectorAll('.dashboard-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Show selected section
+                const targetSection = document.getElementById(`${sectionName}-section`);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                    
+                    // Load section-specific data
+                    if (sectionName === 'analytics') {
+                        this.loadAnalyticsCharts();
+                    }
+                }
+            }
+            
+            updateActiveNav(activeLink) {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                activeLink.classList.add('active');
+            }
+            
+            updateConnectionStatus(status) {
+                const indicator = document.querySelector('.status-indicator');
+                if (indicator) {
+                    indicator.className = `status-indicator status-${status} real-time-indicator`;
+                }
+            }
+            
+            updateLastUpdated() {
+                document.getElementById('last-updated').textContent = 
+                    new Date().toLocaleTimeString();
+            }
+            
+            showLoading(show) {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.style.display = show ? 'block' : 'none';
+                }
+            }
+            
+            showError(message) {
+                // Implementation for error display
+                console.error(message);
+            }
+            
+            async refreshData() {
+                try {
+                    const data = await this.fetchDashboardData();
+                    this.updateDashboardMetrics(data);
+                    this.updateLastUpdated();
+                } catch (error) {
+                    console.error('Failed to refresh data:', error);
+                }
+            }
+            
+            handleUtilizationUpdate(data) {
+                // Handle real-time utilization updates
+                this.updateDashboardMetrics({success: true, data: data});
+            }
+            
+            handleNewBooking(data) {
+                // Handle new booking notifications
+                console.log('New booking:', data);
+            }
+            
+            handleAlert(data) {
+                // Handle real-time alerts
+                console.log('New alert:', data);
+            }
+        }
+        
+        // Global functions
+        function refreshDashboard() {
+            window.dashboard.refreshData();
+        }
+        
+        function exportData() {
+            // Implementation for data export
+            window.open('/api/v1/export/report', '_blank');
+        }
+        
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            window.dashboard = new DashboardManager();
+        });
+    </script>
+</body>
+</html>
