@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Uploaded PDF</title>
+</head>
+<body>
+  <h1>Uploaded PDF</h1>
+
+  {% if success_message %}
+    <p>{{ success_message }}</p>
+  {% endif %}
+
+  {% if download_url %}
+    <p>Your uploaded PDF can be downloaded here:</p>
+    <a href="{{ download_url }}">Download PDF</a>
+  {% endif %}
+
+  <p>*OR*</p>
+
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <button type="submit">Upload New PDF</button>
+  </form>
+</body>
+</html>

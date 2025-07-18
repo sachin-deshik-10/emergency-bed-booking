@@ -1,0 +1,73 @@
+{% extends 'baselogin.html' %}
+{% block title %} Patient details{% endblock title %}
+{% block form %}
+
+
+<div class="row">
+<div class="col-md-4"></div>
+
+<div class="col-md-4">
+
+
+<br>
+<br>
+<h1>Patient Details</h1>
+<div class="card p-3">
+
+<table class="table table-dark">
+  <thead>
+  
+<tr>
+     <th scope="col">{{data.srfid}}</th>
+</tr>
+<tr>
+      <th scope="col">Patient Booking ID</th>
+      <th scope="col">:</th>
+      <th scope="col">{{data.id}}</th>
+</tr>
+<tr>
+      <th scope="col">Bedtype</th>
+      <th scope="col">:</th>
+      <th scope="col">{{data.bedtype}}</th>
+</tr>
+<tr>
+      <th scope="col">Hospital Code</th>
+      <th scope="col">:</th>
+      <th scope="col">{{data.hcode}}</th>
+</tr>
+
+<tr>
+      <th scope="col">Oxygen Level</th>
+      <th scope="col">:</th>
+      <th scope="col">{{data.spo2}}</th>
+</tr>
+      <th scope="col">Patient Name</th>
+      <th scope="col">:</th>
+      <th scope="col">{{data.pname}}</th>
+</tr>
+<tr>
+      <th scope="col">Phone number</th>
+      <th scope="col">:</th>
+      <th scope="col">{{data.pphone}}</th>
+</tr>
+
+<tr>
+      <th scope="col">Address</th>
+      <th scope="col">:</th>
+      <th scope="col">{{data.paddress}}</th>
+</tr>
+
+<tr>
+      <th scope="col">Report</th>
+      <th scope="col">:</th>
+      <td><a href="/view_pdf">open</a></td>
+  </tr>
+  </thead>
+
+</div>
+
+</div>
+<div class="col-md-4"></div>
+
+</div>
+{% endblock form %}

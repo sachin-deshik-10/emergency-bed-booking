@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Contact{% endblock title %}
+
+{% block body %}
+
+<!-- Your page content here -->
+<div id="chat-box" style="display: none;">
+  <!-- Chat box HTML content goes here -->
+  <div id="chat-messages">
+    <!-- Chat messages will be displayed here -->
+  </div>
+  <input type="text" id="chat-input" placeholder="Type your message...">
+  <button id="send-btn">Send</button>
+</div>
+
+<button id="support-btn">Support</button>
+
+{% endblock body %}
+
+{% block support_chat %}
+<script>
+  // Function to toggle the visibility of the chat box
+  function toggleChatBox() {
+    var chatBox = document.getElementById("chat-box");
+    if (chatBox.style.display === "none") {
+      chatBox.style.display = "block";
+    } else {
+      chatBox.style.display = "none";
+    }
+  }
+
+  // Add event listener to the support button
+  document.getElementById("support-btn").addEventListener("click", toggleChatBox);
+
+  // Function to send a POST request to the /support endpoint
+  function sendSupportMessage(message) {
+    fetch("/support", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: "message=" + encodeURIComponent(message)
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Handle the response from the backend if needed
+      console.log(data);
+    })
+    .catch(error => {
+      console.error("Error:", error);
+    });
+  }
+
+  // Add event listener to the send button
+  document.getElementById("send-btn").addEventListener("click", function() {
+    var message = document.getElementById("chat-input").value;
+    sendSupportMessage(message);
+  });
+
+</script>
+{% endblock support_chat %}
