@@ -60,15 +60,18 @@ try {
         if ($major -eq 3 -and $minor -ge 8) {
             Write-Status "Python $($matches[0]) found ✓"
             $pythonCmd = "python"
-        } else {
+        }
+        else {
             Write-Error "Python 3.8+ required. Found $($matches[0])"
             exit 1
         }
-    } else {
+    }
+    else {
         Write-Error "Could not determine Python version"
         exit 1
     }
-} catch {
+}
+catch {
     Write-Error "Python not found. Please install Python 3.8 or later from python.org"
     exit 1
 }
@@ -78,7 +81,8 @@ Write-Step "Checking pip installation..."
 try {
     $pipVersion = pip --version 2>&1
     Write-Status "pip found ✓"
-} catch {
+}
+catch {
     Write-Error "pip not found. Please ensure pip is installed and in PATH"
     exit 1
 }
@@ -89,7 +93,8 @@ Write-Step "Setting up Python virtual environment..."
 if (-not (Test-Path "venv")) {
     Write-Status "Creating virtual environment..."
     python -m venv venv
-} else {
+}
+else {
     Write-Status "Virtual environment already exists ✓"
 }
 
@@ -108,7 +113,8 @@ if (Test-Path "requirements.txt") {
     Write-Status "Installing from requirements.txt..."
     pip install -r requirements.txt
     Write-Status "Dependencies installed ✓"
-} else {
+}
+else {
     Write-Error "requirements.txt not found!"
     exit 1
 }
@@ -140,11 +146,13 @@ if (-not (Test-Path ".env")) {
         Copy-Item ".env.example" ".env"
         Write-Status "Created .env from template"
         Write-Warning "Please edit .env file with your actual configuration values"
-    } else {
+    }
+    else {
         Write-Error ".env.example not found!"
         exit 1
     }
-} else {
+}
+else {
     Write-Status ".env file already exists ✓"
 }
 
@@ -161,14 +169,16 @@ if (Test-Path ".env") {
     # Replace or add SECRET_KEY
     if ($envContent -match "SECRET_KEY=") {
         $envContent = $envContent -replace "SECRET_KEY=.*", "SECRET_KEY=$secretKey"
-    } else {
+    }
+    else {
         $envContent += "SECRET_KEY=$secretKey"
     }
     
     # Replace or add CSRF_SECRET_KEY
     if ($envContent -match "CSRF_SECRET_KEY=") {
         $envContent = $envContent -replace "CSRF_SECRET_KEY=.*", "CSRF_SECRET_KEY=$csrfSecretKey"
-    } else {
+    }
+    else {
         $envContent += "CSRF_SECRET_KEY=$csrfSecretKey"
     }
     
@@ -183,7 +193,8 @@ if (-not $SkipRedis) {
     try {
         redis-cli ping 2>&1 | Out-Null
         Write-Status "Redis is running ✓"
-    } catch {
+    }
+    catch {
         Write-Warning "Redis not found or not running."
         Write-Host "Redis is recommended for enhanced real-time features."
         Write-Host "You can:"
@@ -414,7 +425,8 @@ if (-not $QuickSetup) {
     if ($editConfig -eq 'y' -or $editConfig -eq 'Y') {
         if (Get-Command notepad -ErrorAction SilentlyContinue) {
             notepad .env
-        } else {
+        }
+        else {
             Write-Host "Please edit .env file with your preferred text editor"
         }
     }

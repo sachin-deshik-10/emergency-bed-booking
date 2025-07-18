@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>{% block title %}Emergency Hospital Bed Booking System{% endblock %}</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
-    
+
     <!-- Security Meta Tags -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-    
+
     <!-- Favicons -->
     <link href="{{ url_for('static', filename='assets/img/favicon.png') }}" rel="icon">
     <link href="{{ url_for('static', filename='assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
-    
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+        rel="stylesheet">
+
     <!-- Vendor CSS Files -->
     <link href="{{ url_for('static', filename='assets/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='assets/vendor/animate.css/animate.min.css') }}" rel="stylesheet">
@@ -27,13 +30,13 @@
     <link href="{{ url_for('static', filename='assets/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='assets/vendor/aos/aos.css') }}" rel="stylesheet">
-    
+
     <!-- Main CSS File -->
     <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet">
-    
+
     <!-- Socket.IO for Real-time Features -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    
+
     <!-- Custom Styles -->
     <style>
         .alert-floating {
@@ -44,25 +47,30 @@
             min-width: 300px;
             animation: slideInRight 0.3s ease-in-out;
         }
-        
+
         @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
         }
-        
+
         .bed-status-card {
             transition: all 0.3s ease;
             border-left: 4px solid #28a745;
         }
-        
+
         .bed-status-card.low-availability {
             border-left-color: #ffc107;
         }
-        
+
         .bed-status-card.no-availability {
             border-left-color: #dc3545;
         }
-        
+
         .real-time-indicator {
             display: inline-block;
             width: 10px;
@@ -72,13 +80,21 @@
             animation: pulse 2s infinite;
             margin-right: 5px;
         }
-        
+
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
-        
+
         .connection-status {
             position: fixed;
             bottom: 20px;
@@ -88,17 +104,17 @@
             font-size: 12px;
             z-index: 1000;
         }
-        
+
         .connection-status.connected {
             background-color: #28a745;
             color: white;
         }
-        
+
         .connection-status.disconnected {
             background-color: #dc3545;
             color: white;
         }
-        
+
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -111,7 +127,7 @@
             align-items: center;
             z-index: 9999;
         }
-        
+
         .spinner {
             width: 40px;
             height: 40px;
@@ -120,28 +136,44 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .mfa-input {
             text-align: center;
             font-size: 1.5rem;
             letter-spacing: 0.5rem;
         }
-        
+
         .password-strength {
             margin-top: 5px;
         }
-        
-        .strength-weak { color: #dc3545; }
-        .strength-medium { color: #ffc107; }
-        .strength-strong { color: #28a745; }
-        .strength-very-strong { color: #007bff; }
+
+        .strength-weak {
+            color: #dc3545;
+        }
+
+        .strength-medium {
+            color: #ffc107;
+        }
+
+        .strength-strong {
+            color: #28a745;
+        }
+
+        .strength-very-strong {
+            color: #007bff;
+        }
     </style>
-    
+
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -150,12 +182,12 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
-    
+
     <!-- Connection Status Indicator -->
     <div class="connection-status disconnected" id="connectionStatus">
         <i class="bi bi-wifi-off"></i> Connecting...
     </div>
-    
+
     <!-- Top Bar -->
     <div id="topbar" class="d-flex align-items-center fixed-top">
         <div class="container d-flex justify-content-between">
@@ -165,25 +197,25 @@
             </div>
             <div class="d-none d-lg-flex social-links align-items-center">
                 {% if current_user.is_authenticated %}
-                    <span class="me-3">
-                        <i class="bi bi-person-circle"></i> 
-                        Welcome, {{ current_user.email }}
-                        {% if current_user.user_type == 'hospital' %}
-                            ({{ current_user.hcode }})
-                        {% endif %}
-                    </span>
-                    <span class="real-time-indicator" id="realTimeIndicator"></span>
-                    <small class="text-muted me-3">Live Updates</small>
-                    <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </a>
+                <span class="me-3">
+                    <i class="bi bi-person-circle"></i>
+                    Welcome, {{ current_user.email }}
+                    {% if current_user.user_type == 'hospital' %}
+                    ({{ current_user.hcode }})
+                    {% endif %}
+                </span>
+                <span class="real-time-indicator" id="realTimeIndicator"></span>
+                <small class="text-muted me-3">Live Updates</small>
+                <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-light me-2">
-                        <i class="bi bi-box-arrow-in-right"></i> Patient Login
-                    </a>
-                    <a href="{{ url_for('hospitallogin') }}" class="btn btn-sm btn-outline-light">
-                        <i class="bi bi-hospital"></i> Hospital Login
-                    </a>
+                <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-light me-2">
+                    <i class="bi bi-box-arrow-in-right"></i> Patient Login
+                </a>
+                <a href="{{ url_for('hospitallogin') }}" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-hospital"></i> Hospital Login
+                </a>
                 {% endif %}
             </div>
         </div>
@@ -208,20 +240,20 @@
                     <li><a class="nav-link scrollto" href="#doctors">Doctors</a></li>
                     <li><a class="nav-link scrollto" href="#contact">Contact</a></li>
                     {% if current_user.is_authenticated %}
-                        {% if current_user.user_type == 'hospital' %}
-                            <li><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                        {% elif current_user.user_type == 'patient' %}
-                            <li><a class="nav-link" href="{{ url_for('slotbooking') }}">Book Bed</a></li>
-                        {% endif %}
+                    {% if current_user.user_type == 'hospital' %}
+                    <li><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    {% elif current_user.user_type == 'patient' %}
+                    <li><a class="nav-link" href="{{ url_for('slotbooking') }}">Book Bed</a></li>
+                    {% endif %}
                     {% endif %}
                 </ul>
                 <i class="bi bi-list mobile-nav-toggle"></i>
             </nav>
 
             {% if not current_user.is_authenticated %}
-                <a href="{{ url_for('signup') }}" class="appointment-btn scrollto">
-                    <span class="d-none d-md-inline">Register Now</span>
-                </a>
+            <a href="{{ url_for('signup') }}" class="appointment-btn scrollto">
+                <span class="d-none d-md-inline">Register Now</span>
+            </a>
             {% endif %}
         </div>
     </header>
@@ -229,15 +261,17 @@
     <!-- Flash Messages -->
     <div id="flashMessages" style="margin-top: 100px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show alert-floating" role="alert">
-                        <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show alert-floating"
+            role="alert">
+            <i
+                class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
@@ -288,7 +322,7 @@
                         <h4>Join Our Newsletter</h4>
                         <p>Get updates on bed availability and system enhancements</p>
                         <form action="" method="post">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <input type="email" name="email" placeholder="Enter your email">
                             <input type="submit" value="Subscribe">
                         </form>
@@ -339,7 +373,7 @@
         let isConnected = false;
         let connectionRetries = 0;
         const maxRetries = 5;
-        
+
         // Initialize Socket.IO connection
         function initializeSocket() {
             try {
@@ -350,60 +384,60 @@
                     reconnectionAttempts: maxRetries,
                     reconnectionDelay: 1000
                 });
-                
-                socket.on('connect', function() {
+
+                socket.on('connect', function () {
                     console.log('Connected to server');
                     isConnected = true;
                     connectionRetries = 0;
                     updateConnectionStatus(true);
-                    
+
                     // Request initial data
                     socket.emit('request_bed_update');
                 });
-                
-                socket.on('disconnect', function() {
+
+                socket.on('disconnect', function () {
                     console.log('Disconnected from server');
                     isConnected = false;
                     updateConnectionStatus(false);
                 });
-                
-                socket.on('connect_error', function(error) {
+
+                socket.on('connect_error', function (error) {
                     console.error('Connection error:', error);
                     connectionRetries++;
                     updateConnectionStatus(false);
-                    
+
                     if (connectionRetries >= maxRetries) {
                         showNotification('Connection failed. Please refresh the page.', 'error');
                     }
                 });
-                
-                socket.on('bed_availability_update', function(data) {
+
+                socket.on('bed_availability_update', function (data) {
                     updateBedDisplay(data);
                 });
-                
-                socket.on('bed_availability_changed', function(data) {
+
+                socket.on('bed_availability_changed', function (data) {
                     updateBedDisplay(data);
                     showNotification(`Bed availability updated at ${data.hospital_code}`, 'info');
                 });
-                
-                socket.on('emergency_alert', function(data) {
+
+                socket.on('emergency_alert', function (data) {
                     showEmergencyAlert(data);
                 });
-                
-                socket.on('notification', function(data) {
+
+                socket.on('notification', function (data) {
                     showNotification(data.message, data.priority || 'info');
                 });
-                
+
             } catch (error) {
                 console.error('Socket initialization error:', error);
             }
         }
-        
+
         // Update connection status indicator
         function updateConnectionStatus(connected) {
             const statusElement = document.getElementById('connectionStatus');
             const indicator = document.getElementById('realTimeIndicator');
-            
+
             if (connected) {
                 statusElement.className = 'connection-status connected';
                 statusElement.innerHTML = '<i class="bi bi-wifi"></i> Connected';
@@ -414,23 +448,23 @@
                 if (indicator) indicator.style.display = 'none';
             }
         }
-        
+
         // Show notifications
         function showNotification(message, type = 'info', duration = 5000) {
             const alertClass = type === 'error' ? 'danger' : type;
-            const iconClass = type === 'error' ? 'exclamation-triangle' : 
-                            type === 'success' ? 'check-circle' : 'info-circle';
-            
+            const iconClass = type === 'error' ? 'exclamation-triangle' :
+                type === 'success' ? 'check-circle' : 'info-circle';
+
             const alertHTML = `
                 <div class="alert alert-${alertClass} alert-dismissible fade show alert-floating" role="alert">
                     <i class="bi bi-${iconClass}"></i> ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
-            
+
             const container = document.getElementById('flashMessages');
             container.insertAdjacentHTML('beforeend', alertHTML);
-            
+
             // Auto-hide after duration
             setTimeout(() => {
                 const alerts = container.querySelectorAll('.alert-floating');
@@ -439,7 +473,7 @@
                 }
             }, duration);
         }
-        
+
         // Show emergency alerts
         function showEmergencyAlert(data) {
             const alertHTML = `
@@ -450,9 +484,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
-            
+
             document.getElementById('flashMessages').insertAdjacentHTML('beforeend', alertHTML);
-            
+
             // Play alert sound if available
             try {
                 const audio = new Audio('/static/assets/sounds/alert.mp3');
@@ -461,29 +495,29 @@
                 console.log('Audio not available');
             }
         }
-        
+
         // Update bed availability display
         function updateBedDisplay(data) {
             // This will be customized based on specific page requirements
             console.log('Bed data updated:', data);
-            
+
             // Update bed counts if elements exist
             const bedElements = document.querySelectorAll('.bed-count');
             bedElements.forEach(element => {
                 const hospitalCode = element.dataset.hospital;
                 const bedType = element.dataset.bedType;
-                
+
                 if (data.data) {
                     const hospitalData = data.data.find(h => h.hcode === hospitalCode);
                     if (hospitalData && hospitalData.beds[bedType] !== undefined) {
                         element.textContent = hospitalData.beds[bedType];
-                        
+
                         // Update visual indicators
                         const card = element.closest('.bed-status-card');
                         if (card) {
                             const count = hospitalData.beds[bedType];
                             card.classList.remove('low-availability', 'no-availability');
-                            
+
                             if (count === 0) {
                                 card.classList.add('no-availability');
                             } else if (count < 5) {
@@ -493,99 +527,99 @@
                     }
                 }
             });
-            
+
             // Update timestamp
             const timestampElements = document.querySelectorAll('.last-updated');
             timestampElements.forEach(element => {
                 element.textContent = new Date().toLocaleString();
             });
         }
-        
+
         // Enhanced form validation
         function setupFormValidation() {
             const forms = document.querySelectorAll('form[data-validation="true"]');
-            
+
             forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     if (!validateForm(this)) {
                         e.preventDefault();
                         return false;
                     }
-                    
+
                     // Show loading overlay
                     showLoading();
                 });
             });
         }
-        
+
         // Password strength indicator
         function setupPasswordStrength() {
             const passwordFields = document.querySelectorAll('input[type="password"][data-strength="true"]');
-            
+
             passwordFields.forEach(field => {
                 const strengthIndicator = document.createElement('div');
                 strengthIndicator.className = 'password-strength';
                 field.parentNode.appendChild(strengthIndicator);
-                
-                field.addEventListener('input', function() {
+
+                field.addEventListener('input', function () {
                     const strength = calculatePasswordStrength(this.value);
                     updatePasswordStrengthDisplay(strengthIndicator, strength);
                 });
             });
         }
-        
+
         // Calculate password strength
         function calculatePasswordStrength(password) {
             let score = 0;
             let feedback = [];
-            
+
             if (password.length >= 8) score++;
             else feedback.push('At least 8 characters');
-            
+
             if (/[a-z]/.test(password)) score++;
             else feedback.push('Lowercase letters');
-            
+
             if (/[A-Z]/.test(password)) score++;
             else feedback.push('Uppercase letters');
-            
+
             if (/\d/.test(password)) score++;
             else feedback.push('Numbers');
-            
+
             if (/[@$!%*?&]/.test(password)) score++;
             else feedback.push('Special characters');
-            
+
             const levels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
             const level = levels[Math.min(score, 4)];
-            
+
             return { score, level, feedback };
         }
-        
+
         // Update password strength display
         function updatePasswordStrengthDisplay(indicator, strength) {
             const colorClasses = ['strength-weak', 'strength-weak', 'strength-medium', 'strength-strong', 'strength-very-strong'];
             const colorClass = colorClasses[Math.min(strength.score, 4)];
-            
+
             indicator.className = `password-strength ${colorClass}`;
             indicator.innerHTML = `
                 <small>Strength: ${strength.level}</small>
                 ${strength.feedback.length > 0 ? `<br><small>Missing: ${strength.feedback.join(', ')}</small>` : ''}
             `;
         }
-        
+
         // Show/hide loading overlay
         function showLoading() {
             document.getElementById('loadingOverlay').style.display = 'flex';
         }
-        
+
         function hideLoading() {
             document.getElementById('loadingOverlay').style.display = 'none';
         }
-        
+
         // Form validation
         function validateForm(form) {
             let isValid = true;
             const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
-            
+
             inputs.forEach(input => {
                 if (!input.value.trim()) {
                     showValidationError(input, 'This field is required');
@@ -594,14 +628,14 @@
                     clearValidationError(input);
                 }
             });
-            
+
             return isValid;
         }
-        
+
         // Show validation error
         function showValidationError(input, message) {
             input.classList.add('is-invalid');
-            
+
             let errorDiv = input.parentNode.querySelector('.invalid-feedback');
             if (!errorDiv) {
                 errorDiv = document.createElement('div');
@@ -610,7 +644,7 @@
             }
             errorDiv.textContent = message;
         }
-        
+
         // Clear validation error
         function clearValidationError(input) {
             input.classList.remove('is-invalid');
@@ -619,7 +653,7 @@
                 errorDiv.remove();
             }
         }
-        
+
         // Auto-hide flash messages
         function setupAutoHideMessages() {
             setTimeout(() => {
@@ -631,30 +665,31 @@
                 });
             }, 5000);
         }
-        
+
         // Initialize everything when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize Socket.IO if user is authenticated
             {% if current_user.is_authenticated %}
-                initializeSocket();
+            initializeSocket();
             {% endif %}
-            
+
             setupFormValidation();
             setupPasswordStrength();
             setupAutoHideMessages();
-            
+
             // Hide loading overlay
             hideLoading();
         });
-        
+
         // Handle page unload
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('beforeunload', function () {
             if (socket) {
                 socket.disconnect();
             }
         });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

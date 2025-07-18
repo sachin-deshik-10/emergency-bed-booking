@@ -39,15 +39,18 @@ try {
         if ($major -eq 3 -and $minor -ge 8) {
             Write-Host "[INFO] Python $($matches[0]) found ✓" -ForegroundColor Green
             $pythonCmd = "python"
-        } else {
+        }
+        else {
             Write-Host "[ERROR] Python 3.8+ required. Found $($matches[0])" -ForegroundColor Red
             exit 1
         }
-    } else {
+    }
+    else {
         Write-Host "[ERROR] Could not determine Python version" -ForegroundColor Red
         exit 1
     }
-} catch {
+}
+catch {
     Write-Host "[ERROR] Python not found. Please install Python 3.8 or later from python.org" -ForegroundColor Red
     exit 1
 }
@@ -57,7 +60,8 @@ Write-Host "[STEP] Checking pip installation..." -ForegroundColor Blue
 try {
     $pipVersion = pip --version 2>&1
     Write-Host "[INFO] pip found ✓" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "[ERROR] pip not found. Please ensure pip is installed and in PATH" -ForegroundColor Red
     exit 1
 }
@@ -68,7 +72,8 @@ Write-Host "[STEP] Setting up Python virtual environment..." -ForegroundColor Bl
 if (-not (Test-Path "venv")) {
     Write-Host "[INFO] Creating virtual environment..." -ForegroundColor Green
     python -m venv venv
-} else {
+}
+else {
     Write-Host "[INFO] Virtual environment already exists ✓" -ForegroundColor Green
 }
 
@@ -87,7 +92,8 @@ if (Test-Path "requirements.txt") {
     Write-Host "[INFO] Installing from requirements.txt..." -ForegroundColor Green
     pip install -r requirements.txt
     Write-Host "[INFO] Dependencies installed ✓" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "[ERROR] requirements.txt not found!" -ForegroundColor Red
     exit 1
 }
@@ -119,11 +125,13 @@ if (-not (Test-Path ".env")) {
         Copy-Item ".env.example" ".env"
         Write-Host "[INFO] Created .env from template" -ForegroundColor Green
         Write-Host "[WARNING] Please edit .env file with your actual configuration values" -ForegroundColor Yellow
-    } else {
+    }
+    else {
         Write-Host "[ERROR] .env.example not found!" -ForegroundColor Red
         exit 1
     }
-} else {
+}
+else {
     Write-Host "[INFO] .env file already exists ✓" -ForegroundColor Green
 }
 
@@ -140,14 +148,16 @@ if (Test-Path ".env") {
     # Replace or add SECRET_KEY
     if ($envContent -match "SECRET_KEY=") {
         $envContent = $envContent -replace "SECRET_KEY=.*", "SECRET_KEY=$secretKey"
-    } else {
+    }
+    else {
         $envContent += "SECRET_KEY=$secretKey"
     }
     
     # Replace or add CSRF_SECRET_KEY
     if ($envContent -match "CSRF_SECRET_KEY=") {
         $envContent = $envContent -replace "CSRF_SECRET_KEY=.*", "CSRF_SECRET_KEY=$csrfSecretKey"
-    } else {
+    }
+    else {
         $envContent += "CSRF_SECRET_KEY=$csrfSecretKey"
     }
     
@@ -162,7 +172,8 @@ if (-not $SkipRedis) {
     try {
         redis-cli ping 2>&1 | Out-Null
         Write-Host "[INFO] Redis is running ✓" -ForegroundColor Green
-    } catch {
+    }
+    catch {
         Write-Host "[WARNING] Redis not found or not running." -ForegroundColor Yellow
         Write-Host "Redis is recommended for enhanced real-time features."
         Write-Host "You can:"
@@ -393,7 +404,8 @@ if (-not $QuickSetup) {
     if ($editConfig -eq 'y' -or $editConfig -eq 'Y') {
         if (Get-Command notepad -ErrorAction SilentlyContinue) {
             notepad .env
-        } else {
+        }
+        else {
             Write-Host "Please edit .env file with your preferred text editor"
         }
     }

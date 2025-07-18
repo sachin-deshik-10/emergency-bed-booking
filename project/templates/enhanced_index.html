@@ -13,9 +13,9 @@
             <small class="text-muted">Live updates every few seconds</small>
         </div>
         {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('signup') }}" class="btn-get-started scrollto">Get Started</a>
+        <a href="{{ url_for('signup') }}" class="btn-get-started scrollto">Get Started</a>
         {% else %}
-            <a href="{{ url_for('slotbooking') }}" class="btn-get-started scrollto">Book Emergency Bed</a>
+        <a href="{{ url_for('slotbooking') }}" class="btn-get-started scrollto">Book Emergency Bed</a>
         {% endif %}
     </div>
 </section>
@@ -26,7 +26,8 @@
         <div class="section-title">
             <h2>Real-time Bed Availability</h2>
             <p>Live updates from hospitals across the network</p>
-            <small class="text-muted">Last updated: <span id="lastUpdated">{{ moment().format('YYYY-MM-DD HH:mm:ss') }}</span></small>
+            <small class="text-muted">Last updated: <span id="lastUpdated">{{ moment().format('YYYY-MM-DD HH:mm:ss')
+                    }}</span></small>
         </div>
 
         <!-- Quick Stats -->
@@ -44,7 +45,8 @@
                 <div class="stats-card">
                     <div class="card-body text-center">
                         <i class="bi bi-activity text-success mb-2" style="font-size: 2rem;"></i>
-                        <h3 id="totalBeds">{{ bed_data|map(attribute='availability')|map(attribute='total_beds')|sum }}</h3>
+                        <h3 id="totalBeds">{{ bed_data|map(attribute='availability')|map(attribute='total_beds')|sum }}
+                        </h3>
                         <p>Available Beds</p>
                     </div>
                 </div>
@@ -53,7 +55,8 @@
                 <div class="stats-card">
                     <div class="card-body text-center">
                         <i class="bi bi-heart-pulse text-danger mb-2" style="font-size: 2rem;"></i>
-                        <h3 id="icuBeds">{{ bed_data|map(attribute='availability')|map(attribute='icu')|sum + bed_data|map(attribute='availability')|map(attribute='hicu')|sum }}</h3>
+                        <h3 id="icuBeds">{{ bed_data|map(attribute='availability')|map(attribute='icu')|sum +
+                            bed_data|map(attribute='availability')|map(attribute='hicu')|sum }}</h3>
                         <p>ICU/HICU Beds</p>
                     </div>
                 </div>
@@ -62,7 +65,8 @@
                 <div class="stats-card">
                     <div class="card-body text-center">
                         <i class="bi bi-lungs text-warning mb-2" style="font-size: 2rem;"></i>
-                        <h3 id="ventilatorBeds">{{ bed_data|map(attribute='availability')|map(attribute='ventilator')|sum }}</h3>
+                        <h3 id="ventilatorBeds">{{
+                            bed_data|map(attribute='availability')|map(attribute='ventilator')|sum }}</h3>
                         <p>Ventilator Beds</p>
                     </div>
                 </div>
@@ -92,8 +96,7 @@
                             <div class="col-6 col-md-3 text-center mb-3">
                                 <div class="bed-type-box">
                                     <i class="bi bi-bed text-info mb-2" style="font-size: 1.5rem;"></i>
-                                    <h4 class="bed-count" 
-                                        data-hospital="{{ hospital_data.hospital.hcode }}" 
+                                    <h4 class="bed-count" data-hospital="{{ hospital_data.hospital.hcode }}"
                                         data-bed-type="normal">
                                         {{ hospital_data.availability.normal }}
                                     </h4>
@@ -103,8 +106,7 @@
                             <div class="col-6 col-md-3 text-center mb-3">
                                 <div class="bed-type-box">
                                     <i class="bi bi-heart-pulse text-warning mb-2" style="font-size: 1.5rem;"></i>
-                                    <h4 class="bed-count" 
-                                        data-hospital="{{ hospital_data.hospital.hcode }}" 
+                                    <h4 class="bed-count" data-hospital="{{ hospital_data.hospital.hcode }}"
                                         data-bed-type="hicu">
                                         {{ hospital_data.availability.hicu }}
                                     </h4>
@@ -114,8 +116,7 @@
                             <div class="col-6 col-md-3 text-center mb-3">
                                 <div class="bed-type-box">
                                     <i class="bi bi-activity text-danger mb-2" style="font-size: 1.5rem;"></i>
-                                    <h4 class="bed-count" 
-                                        data-hospital="{{ hospital_data.hospital.hcode }}" 
+                                    <h4 class="bed-count" data-hospital="{{ hospital_data.hospital.hcode }}"
                                         data-bed-type="icu">
                                         {{ hospital_data.availability.icu }}
                                     </h4>
@@ -125,8 +126,7 @@
                             <div class="col-6 col-md-3 text-center mb-3">
                                 <div class="bed-type-box">
                                     <i class="bi bi-lungs text-primary mb-2" style="font-size: 1.5rem;"></i>
-                                    <h4 class="bed-count" 
-                                        data-hospital="{{ hospital_data.hospital.hcode }}" 
+                                    <h4 class="bed-count" data-hospital="{{ hospital_data.hospital.hcode }}"
                                         data-bed-type="ventilator">
                                         {{ hospital_data.availability.ventilator }}
                                     </h4>
@@ -134,7 +134,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         {% if hospital_data.hospital.phone %}
                         <div class="mt-3 pt-3 border-top">
                             <small class="text-muted">
@@ -142,16 +142,16 @@
                             </small>
                         </div>
                         {% endif %}
-                        
+
                         {% if current_user.is_authenticated and current_user.user_type == 'patient' %}
                         <div class="mt-3">
-                            <a href="{{ url_for('slotbooking') }}?hospital={{ hospital_data.hospital.hcode }}" 
-                               class="btn btn-primary btn-sm w-100"
-                               {% if hospital_data.availability.total_beds == 0 %}disabled{% endif %}>
+                            <a href="{{ url_for('slotbooking') }}?hospital={{ hospital_data.hospital.hcode }}"
+                                class="btn btn-primary btn-sm w-100" {% if hospital_data.availability.total_beds==0
+                                %}disabled{% endif %}>
                                 {% if hospital_data.availability.total_beds > 0 %}
-                                    <i class="bi bi-calendar-plus"></i> Book Bed
+                                <i class="bi bi-calendar-plus"></i> Book Bed
                                 {% else %}
-                                    <i class="bi bi-x-circle"></i> No Beds Available
+                                <i class="bi bi-x-circle"></i> No Beds Available
                                 {% endif %}
                             </a>
                         </div>
@@ -176,30 +176,36 @@
 <section id="about" class="about">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xl-5 col-lg-6 video-box d-flex justify-content-center align-items-stretch position-relative">
+            <div
+                class="col-xl-5 col-lg-6 video-box d-flex justify-content-center align-items-stretch position-relative">
                 <a href="https://www.youtube.com/watch?v=jDDaplaOz7Q" class="glightbox play-btn mb-4"></a>
             </div>
 
-            <div class="col-xl-7 col-lg-6 icon-boxes d-flex flex-column align-items-stretch justify-content-center py-5 px-lg-5">
+            <div
+                class="col-xl-7 col-lg-6 icon-boxes d-flex flex-column align-items-stretch justify-content-center py-5 px-lg-5">
                 <h3>Emergency Bed Booking System Features</h3>
-                <p>Our advanced system provides real-time bed availability tracking and secure booking platform for emergency medical situations.</p>
+                <p>Our advanced system provides real-time bed availability tracking and secure booking platform for
+                    emergency medical situations.</p>
 
                 <div class="icon-box">
                     <div class="icon"><i class="bx bx-fingerprint"></i></div>
                     <h4 class="title"><a href="">Enhanced Security</a></h4>
-                    <p class="description">Multi-factor authentication, encrypted data transmission, and comprehensive audit logging ensure your data is protected.</p>
+                    <p class="description">Multi-factor authentication, encrypted data transmission, and comprehensive
+                        audit logging ensure your data is protected.</p>
                 </div>
 
                 <div class="icon-box">
                     <div class="icon"><i class="bx bx-gift"></i></div>
                     <h4 class="title"><a href="">Real-time Updates</a></h4>
-                    <p class="description">Live bed availability updates using WebSocket technology provide instant information to save critical time.</p>
+                    <p class="description">Live bed availability updates using WebSocket technology provide instant
+                        information to save critical time.</p>
                 </div>
 
                 <div class="icon-box">
                     <div class="icon"><i class="bx bx-atom"></i></div>
                     <h4 class="title"><a href="">Smart Matching</a></h4>
-                    <p class="description">AI-powered patient-bed matching based on medical conditions, location, and bed type requirements.</p>
+                    <p class="description">AI-powered patient-bed matching based on medical conditions, location, and
+                        bed type requirements.</p>
                 </div>
 
             </div>
@@ -272,11 +278,12 @@
     <div class="container">
         <div class="text-center">
             <h3>In an emergency, every second counts</h3>
-            <p>Join thousands of patients and healthcare providers using our secure, real-time bed booking system. Get instant access to available beds across the hospital network.</p>
+            <p>Join thousands of patients and healthcare providers using our secure, real-time bed booking system. Get
+                instant access to available beds across the hospital network.</p>
             {% if not current_user.is_authenticated %}
-                <a class="cta-btn" href="{{ url_for('signup') }}">Register Now</a>
+            <a class="cta-btn" href="{{ url_for('signup') }}">Register Now</a>
             {% else %}
-                <a class="cta-btn" href="{{ url_for('slotbooking') }}">Book Emergency Bed</a>
+            <a class="cta-btn" href="{{ url_for('slotbooking') }}">Book Emergency Bed</a>
             {% endif %}
         </div>
     </div>
@@ -325,89 +332,97 @@
         padding: 60px 0;
         background-color: #f8f9fa;
     }
-    
+
     .stats-card {
         background: white;
         border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease;
         border: none;
         margin-bottom: 20px;
     }
-    
+
     .stats-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
     }
-    
+
     .bed-status-card {
         transition: all 0.3s ease;
         border: none;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-    
+
     .bed-status-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
     }
-    
+
     .bed-type-box {
         padding: 15px;
         border-radius: 8px;
         background: #f8f9fa;
         transition: all 0.3s ease;
     }
-    
+
     .bed-type-box:hover {
         background: #e9ecef;
         transform: scale(1.05);
     }
-    
+
     .bed-count {
         font-weight: bold;
         margin: 10px 0 5px 0;
         font-size: 1.8rem;
     }
-    
+
     .section-title {
         text-align: center;
         padding-bottom: 30px;
     }
-    
+
     .hero-subtitle {
         font-size: 1.2rem;
         color: #6c757d;
         margin-bottom: 30px;
     }
-    
+
     .real-time-pulse {
         animation: pulse 2s infinite;
     }
-    
+
     @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.5; }
-        100% { opacity: 1; }
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+
+        100% {
+            opacity: 1;
+        }
     }
-    
+
     .low-availability .bed-count {
         color: #ffc107;
     }
-    
+
     .no-availability .bed-count {
         color: #dc3545;
     }
-    
+
     .available .bed-count {
         color: #28a745;
     }
-    
+
     @media (max-width: 768px) {
         .bed-type-box {
             padding: 10px;
             margin-bottom: 15px;
         }
-        
+
         .bed-count {
             font-size: 1.5rem;
         }
@@ -420,39 +435,39 @@
     // Enhanced bed availability updates
     function updateBedDisplay(data) {
         console.log('Updating bed display:', data);
-        
+
         if (data.data && Array.isArray(data.data)) {
             // Update individual hospital cards
             data.data.forEach(hospital => {
                 updateHospitalCard(hospital);
             });
-            
+
             // Update summary statistics
             updateSummaryStats(data.data);
         }
-        
+
         // Update timestamp
         document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
     }
-    
+
     function updateHospitalCard(hospital) {
         const hospitalCode = hospital.hcode;
         const card = document.querySelector(`[data-hospital="${hospitalCode}"]`);
-        
+
         if (!card) return;
-        
+
         // Update bed counts
         const bedTypes = ['normal', 'hicu', 'icu', 'ventilator'];
         bedTypes.forEach(bedType => {
             const countElement = card.querySelector(`[data-bed-type="${bedType}"]`);
             if (countElement && hospital.beds[bedType] !== undefined) {
                 countElement.textContent = hospital.beds[bedType];
-                
+
                 // Update color based on availability
                 updateBedAvailabilityColor(countElement, hospital.beds[bedType]);
             }
         });
-        
+
         // Update hospital status
         const statusElement = document.getElementById(`status-${hospitalCode}`);
         if (statusElement) {
@@ -468,7 +483,7 @@
                 statusElement.className = 'badge bg-danger';
             }
         }
-        
+
         // Update card border color
         card.classList.remove('low-availability', 'no-availability');
         if (hospital.total_available === 0) {
@@ -476,7 +491,7 @@
         } else if (hospital.total_available < 5) {
             card.classList.add('low-availability');
         }
-        
+
         // Update booking button
         const bookingBtn = card.querySelector('.btn-primary');
         if (bookingBtn) {
@@ -493,10 +508,10 @@
             }
         }
     }
-    
+
     function updateBedAvailabilityColor(element, count) {
         element.classList.remove('text-success', 'text-warning', 'text-danger');
-        
+
         if (count === 0) {
             element.classList.add('text-danger');
         } else if (count < 3) {
@@ -505,23 +520,23 @@
             element.classList.add('text-success');
         }
     }
-    
+
     function updateSummaryStats(hospitals) {
         let totalBeds = 0;
         let icuBeds = 0;
         let ventilatorBeds = 0;
-        
+
         hospitals.forEach(hospital => {
             totalBeds += hospital.total_available || 0;
             icuBeds += (hospital.beds.icu || 0) + (hospital.beds.hicu || 0);
             ventilatorBeds += hospital.beds.ventilator || 0;
         });
-        
+
         // Update summary cards
         const totalBedsElement = document.getElementById('totalBeds');
         const icuBedsElement = document.getElementById('icuBeds');
         const ventilatorBedsElement = document.getElementById('ventilatorBeds');
-        
+
         if (totalBedsElement) {
             animateCounterUpdate(totalBedsElement, totalBeds);
         }
@@ -532,29 +547,29 @@
             animateCounterUpdate(ventilatorBedsElement, ventilatorBeds);
         }
     }
-    
+
     function animateCounterUpdate(element, newValue) {
         const currentValue = parseInt(element.textContent) || 0;
         const difference = newValue - currentValue;
-        
+
         if (difference === 0) return;
-        
+
         // Add animation class
         element.classList.add('real-time-pulse');
-        
+
         // Animate the counter
         const steps = 10;
         const stepValue = difference / steps;
         let current = currentValue;
-        
+
         const interval = setInterval(() => {
             current += stepValue;
             element.textContent = Math.round(current);
-            
+
             if (Math.abs(current - newValue) < Math.abs(stepValue)) {
                 element.textContent = newValue;
                 clearInterval(interval);
-                
+
                 // Remove animation class
                 setTimeout(() => {
                     element.classList.remove('real-time-pulse');
@@ -562,16 +577,16 @@
             }
         }, 50);
     }
-    
+
     // Auto-refresh bed data every 30 seconds
     setInterval(() => {
         if (socket && socket.connected) {
             socket.emit('request_bed_update');
         }
     }, 30000);
-    
+
     // Initialize bed status colors on page load
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const bedCounts = document.querySelectorAll('.bed-count');
         bedCounts.forEach(element => {
             const count = parseInt(element.textContent) || 0;
